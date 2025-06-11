@@ -2,6 +2,10 @@
 
 extends Control
 
+# Database
+var database: SQLite
+var registered_users_count: int
+
 # Networking
 var peer = ENetMultiplayerPeer.new()
 var port = 8910
@@ -26,7 +30,10 @@ var local_username = ""
 
 func _ready():
 	# Setup SQLite
-	var database = SQLite.new()
+	database = SQLite.new()
+	database.path = "res://Database/data.db"
+	database.open_db()
+	create_sql_table("users")
 	
 	
 	# Connect UI signals
@@ -185,6 +192,7 @@ func _register_player(username: String):
 	if is_host:
 		var sender_id = multiplayer.get_remote_sender_id()
 		players[sender_id] = {"username": username, "id": sender_id}
+		insert_data(sender_id, username)
 		_add_chat_message("System", username + " joined the game")
 		
 		# Update all clients with new players list
@@ -215,3 +223,21 @@ func _input(event):
 	# Update send button state when typing
 	if event is InputEventKey and chat_input.has_focus():
 		call_deferred("_update_ui")
+
+
+func create_sql_table(tablename: String) -> void:
+	var table = {
+		"id": {"data_type": "int", "primary_key": true, "not_null": true, "auto_increment": true},
+		"userid" : {"data_type": "int"},
+		"username" : {"data_type": "text"}
+	}
+	database.create_table(tablename, table)
+
+func insert_data(userid: int, username: String) -> void:
+	registered_users_count += 1
+	var data = {
+		"id": registered_users_count,
+		"userid" : userid,
+		"username" : username
+	}
+	database.insert_row("users", data)
