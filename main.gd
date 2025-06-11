@@ -4,7 +4,6 @@ extends Control
 
 # Database
 var database: SQLite
-var registered_users_count: int
 
 # Networking
 var peer = ENetMultiplayerPeer.new()
@@ -54,7 +53,7 @@ func _ready():
 	multiplayer.server_disconnected.connect(_on_server_disconnected)
 	
 	# Set default IP
-	ip_input.text = "172.31.1.77"
+	ip_input.text = "172.31.1.75"
 	
 	# Update UI
 	_update_ui()
@@ -234,9 +233,7 @@ func create_sql_table(tablename: String) -> void:
 	database.create_table(tablename, table)
 
 func insert_data(userid: int, username: String) -> void:
-	registered_users_count += 1
 	var data = {
-		"id": registered_users_count,
 		"userid" : userid,
 		"username" : username
 	}
